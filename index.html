@@ -168,109 +168,137 @@ tr.cambio td{opacity:.55}
 .sync{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:13px;color:var(--muted)}
 .sync .dot{display:inline-block;width:8px;height:8px;border-radius:99px;background:var(--ok);margin-right:6px}
 .sync .dot.warn{background:var(--warn)} .sync .dot.bad{background:var(--bad)}
+.sync .espera{font-weight:600;color:var(--warn);font-variant-numeric:tabular-nums}
+.sync #syncNow{margin-left:auto}
+/* ---------- pantallas ---------- */
+.home{max-width:560px;margin:0 auto;min-height:calc(100dvh - 90px - env(safe-area-inset-top) - env(safe-area-inset-bottom));display:grid;grid-template-rows:auto 1fr 1fr 1fr;gap:14px}
+.home-title{font-size:20px;color:var(--muted);text-align:center;padding-block:4px}
+.big-btn{display:grid;align-content:center;justify-items:start;gap:2px;padding:20px 26px;border-radius:22px;text-decoration:none;color:#fff;min-height:118px;background:var(--c);box-shadow:0 6px 18px rgba(0,0,0,.12);transition:transform .08s}
+.big-btn:active{transform:scale(.98)}
+.big-btn:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.b-inicio{--c:#1F6B57} .b-registro{--c:#3F5F9A} .b-deudas{--c:#A6413A}
+.big-ico{font-size:24px;opacity:.85;line-height:1}
+.big-txt{font-family:var(--display);font-size:36px;font-weight:700;letter-spacing:.03em;line-height:1.1}
+.big-sub{font-size:14.5px;opacity:.88}
+.wrap.pantallas{gap:12px}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:4;background:var(--ground);display:flex;align-items:center;gap:8px;padding-block:8px;flex-wrap:wrap;justify-content:flex-start}
+.topbar h1{font-size:22px;flex:1;min-width:0}
+.topbar .hright{gap:6px}
+.btn.back{display:inline-flex;align-items:center;text-decoration:none;color:var(--accent);font-weight:600;border-color:transparent;background:transparent;padding-left:0}
+.sub-status{margin:0;font-size:12.5px;color:var(--muted)}
+.sub-status b{color:var(--accent);font-weight:600}
+.screen{display:grid;gap:16px;min-width:0}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div class="brand">
-      <h1>GTO Universal</h1>
-      <p id="status">Conectando con GitHub…</p>
-    </div>
+<!-- ============ PANTALLA PRINCIPAL ============ -->
+<main class="home" id="scrHome">
+  <h1 class="home-title">GTO Universal</h1>
+  <a class="big-btn b-inicio" href="#inicio"><span class="big-ico" aria-hidden="true">▦</span><span class="big-txt">INICIO</span><span class="big-sub">Resumen del mes</span></a>
+  <a class="big-btn b-registro" href="#registro"><span class="big-ico" aria-hidden="true">＋</span><span class="big-txt">REGISTRO</span><span class="big-sub">Capturar y ver movimientos</span></a>
+  <a class="big-btn b-deudas" href="#deudas"><span class="big-ico" aria-hidden="true">▭</span><span class="big-txt">DEUDAS</span><span class="big-sub">Saldos de tarjetas</span></a>
+</main>
+
+<!-- ============ BARRA COMÚN DE LAS PANTALLAS ============ -->
+<div class="wrap pantallas" id="subWrap" hidden>
+  <header class="topbar">
+    <a class="btn back" href="#">‹ Menú</a>
+    <h1 id="scrTitle">INICIO</h1>
     <div class="hright">
-      <label class="label" for="mesSel">Mes</label>
-      <select class="mes" id="mesSel"></select>
-      <button class="btn" type="button" id="refresh">Actualizar</button>
+      <select class="mes" id="mesSel" aria-label="Mes"></select>
+      <button class="btn" type="button" id="refresh" aria-label="Actualizar">↻</button>
       <button class="btn ghost" type="button" id="openSetup" aria-label="Configuración">⚙︎</button>
     </div>
   </header>
-
+  <p class="sub-status" id="status">Conectando con GitHub…</p>
   <div class="sync" id="syncBar" hidden></div>
   <div class="error-box" id="errBox" hidden></div>
 
-  <section class="summary" aria-label="Resumen de INICIO">
-    <div class="panel-head"><span class="label">Resumen de INICIO · <span id="sumMes"></span></span><span class="sub" id="sumNota">Real · <span style="color:var(--plan)">planeado</span></span></div>
-    <div class="sgrid">
-      <div class="metric"><span class="label">Ingreso</span><span class="v" id="mIng">—</span><span class="p">planeado <span id="mIngP">—</span></span></div>
-      <div class="metric"><span class="label">Gasto</span><span class="v" id="mGas">—</span><span class="p">planeado <span id="mGasP">—</span></span></div>
-      <div class="metric"><span class="label">Pago tarjeta</span><span class="v" id="mPag">—</span><span class="p">planeado <span id="mPagP">—</span></span></div>
-      <div class="metric"><span class="label">Disponible</span><span class="v" id="mDis">—</span><span class="p">planeado <span id="mDisP">—</span></span></div>
-      <div class="metric debt"><span class="label">Deuda tarjetas</span><span class="v" id="mDeuda">—</span><span class="p">próximo pago <span id="mProx">—</span></span></div>
-    </div>
-  </section>
+  <!-- ============ INICIO ============ -->
+  <div class="screen" id="scrInicio" hidden>
+    <section class="summary" aria-label="Resumen de INICIO">
+      <div class="panel-head"><span class="label">Resumen de INICIO · <span id="sumMes"></span></span><span class="sub" id="sumNota">Real · <span style="color:var(--plan)">planeado</span></span></div>
+      <div class="sgrid">
+        <div class="metric"><span class="label">Ingreso</span><span class="v" id="mIng">—</span><span class="p">planeado <span id="mIngP">—</span></span></div>
+        <div class="metric"><span class="label">Gasto</span><span class="v" id="mGas">—</span><span class="p">planeado <span id="mGasP">—</span></span></div>
+        <div class="metric"><span class="label">Pago tarjeta</span><span class="v" id="mPag">—</span><span class="p">planeado <span id="mPagP">—</span></span></div>
+        <div class="metric"><span class="label">Disponible</span><span class="v" id="mDis">—</span><span class="p">planeado <span id="mDisP">—</span></span></div>
+        <div class="metric debt"><span class="label">Deuda tarjetas</span><span class="v" id="mDeuda">—</span><span class="p">próximo pago <span id="mProx">—</span></span></div>
+      </div>
+    </section>
+    <section class="panel" aria-labelledby="moTitle">
+      <div class="panel-head"><h2 id="moTitle">Gasto por motivo</h2>
+        <div class="legend"><span style="--c:var(--plan)">Planeado</span><span style="--c:var(--accent)">Real</span></div></div>
+      <div class="mots" id="mots"></div>
+    </section>
+  </div>
 
-  <div class="grid">
-    <div class="col">
-      <section class="panel" aria-labelledby="fTitle">
-        <div class="panel-head"><h2 id="fTitle">Nuevo movimiento</h2><span class="label">→ REGISTRO</span></div>
-        <form id="form" autocomplete="off">
-          <div class="field"><span class="flabel">Tipo</span><div class="seg" id="segTipo" role="group" aria-label="Tipo"></div></div>
-          <div class="field"><span class="flabel">Estado</span><div class="seg estado" id="segEstado" role="group" aria-label="Estado"></div></div>
-          <div class="field">
-            <label for="concepto">Concepto</label>
-            <input id="concepto" list="dlConceptos" maxlength="120" required placeholder="Escribe o elige uno que ya usaste">
-            <datalist id="dlConceptos"></datalist>
-            <p class="hint" id="conceptoHint" hidden></p>
-          </div>
-          <div class="two">
-            <div class="field"><label for="importe">Importe</label><input id="importe" class="num" type="number" inputmode="decimal" step="0.01" min="0.01" required placeholder="0.00"></div>
-            <div class="field"><label for="fecha">Fecha</label><input id="fecha" type="date" required></div>
-          </div>
-          <div class="two">
-            <div class="field"><label for="motivo">Motivo</label><select id="motivo"></select></div>
-            <div class="field"><label for="mes">Mes</label><select id="mes"></select></div>
-          </div>
-          <div class="two">
-            <div class="field"><label for="medio">Medio</label><select id="medio"></select></div>
-            <div class="field" id="tarjetaField"><label for="tarjeta">Tarjeta</label><select id="tarjeta"></select></div>
-          </div>
-          <div class="field"><label for="notas">Notas <span style="font-weight:400">(opcional)</span></label><input id="notas" maxlength="200"></div>
-          <p class="impact" id="impact" hidden></p>
-          <p class="msg" id="formMsg" role="alert"></p>
-          <div class="factions">
-            <button class="btn primary" type="submit" id="saveBtn">Guardar</button>
-            <button class="btn" type="button" id="cancelEdit" hidden>Cancelar</button>
-          </div>
-          <p class="hint">Se guarda en la nube al instante y pasa a tu Excel cuando la PC sincroniza.</p>
-        </form>
-      </section>
-
-      <section class="panel" aria-labelledby="eTitle" id="errPanel" hidden>
-        <div class="panel-head"><h2 id="eTitle">No se pudieron aplicar</h2><span class="label">Revisa y vuelve a capturar</span></div>
-        <div class="errs" id="errs"></div>
-      </section>
-
-      <section class="panel" aria-labelledby="dTitle">
-        <div class="panel-head"><h2 id="dTitle">Deudas</h2><span class="label">Hoja DEUDAS</span></div>
-        <div class="debts" id="debts"></div>
-      </section>
-    </div>
-
-    <div class="col">
-      <section class="panel" aria-labelledby="rTitle">
-        <div class="panel-head">
-          <h2 id="rTitle">Registro de <span id="regMes"></span></h2>
-          <span class="sub" id="regCount"></span>
+  <!-- ============ REGISTRO ============ -->
+  <div class="screen" id="scrRegistro" hidden>
+    <section class="panel" aria-labelledby="fTitle">
+      <div class="panel-head"><h2 id="fTitle">Nuevo movimiento</h2><span class="label">→ REGISTRO</span></div>
+      <form id="form" autocomplete="off">
+        <div class="field"><span class="flabel">Tipo</span><div class="seg" id="segTipo" role="group" aria-label="Tipo"></div></div>
+        <div class="field"><span class="flabel">Estado</span><div class="seg estado" id="segEstado" role="group" aria-label="Estado"></div></div>
+        <div class="field">
+          <label for="concepto">Concepto</label>
+          <input id="concepto" list="dlConceptos" maxlength="120" required placeholder="Escribe o elige uno que ya usaste">
+          <datalist id="dlConceptos"></datalist>
+          <p class="hint" id="conceptoHint" hidden></p>
         </div>
-        <div class="tools">
-          <input id="buscar" type="search" placeholder="Buscar concepto, motivo o notas…" aria-label="Buscar">
-          <select id="fTipo" aria-label="Filtrar por tipo"><option value="">Todos los tipos</option></select>
-          <select id="fEstado" aria-label="Filtrar por estado"><option value="">Planeado y real</option></select>
+        <div class="two">
+          <div class="field"><label for="importe">Importe</label><input id="importe" class="num" type="number" inputmode="decimal" step="0.01" min="0.01" required placeholder="0.00"></div>
+          <div class="field"><label for="fecha">Fecha</label><input id="fecha" type="date" required></div>
         </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Fecha</th><th>Concepto</th><th>Tipo</th><th class="col-hide">Medio</th><th>Estado</th><th class="r">Importe</th><th></th></tr></thead>
-            <tbody id="rows"></tbody>
-          </table>
+        <div class="two">
+          <div class="field"><label for="motivo">Motivo</label><select id="motivo"></select></div>
+          <div class="field"><label for="mes">Mes</label><select id="mes"></select></div>
         </div>
-      </section>
+        <div class="two">
+          <div class="field"><label for="medio">Medio</label><select id="medio"></select></div>
+          <div class="field" id="tarjetaField"><label for="tarjeta">Tarjeta</label><select id="tarjeta"></select></div>
+        </div>
+        <div class="field"><label for="notas">Notas <span style="font-weight:400">(opcional)</span></label><input id="notas" maxlength="200"></div>
+        <p class="impact" id="impact" hidden></p>
+        <p class="msg" id="formMsg" role="alert"></p>
+        <div class="factions">
+          <button class="btn primary" type="submit" id="saveBtn">Guardar</button>
+          <button class="btn" type="button" id="cancelEdit" hidden>Cancelar</button>
+        </div>
+        <p class="hint">Se guarda en la nube al instante y pasa a tu Excel cuando la PC sincroniza.</p>
+      </form>
+    </section>
 
-      <section class="panel" aria-labelledby="moTitle">
-        <div class="panel-head"><h2 id="moTitle">Gasto por motivo</h2>
-          <div class="legend"><span style="--c:var(--plan)">Planeado</span><span style="--c:var(--accent)">Real</span></div></div>
-        <div class="mots" id="mots"></div>
-      </section>
-    </div>
+    <section class="panel" aria-labelledby="eTitle" id="errPanel" hidden>
+      <div class="panel-head"><h2 id="eTitle">No se pudieron aplicar</h2><span class="label">Revisa y vuelve a capturar</span></div>
+      <div class="errs" id="errs"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="rTitle">
+      <div class="panel-head">
+        <h2 id="rTitle">Movimientos de <span id="regMes"></span></h2>
+        <span class="sub" id="regCount"></span>
+      </div>
+      <div class="tools">
+        <input id="buscar" type="search" placeholder="Buscar concepto, motivo o notas…" aria-label="Buscar">
+        <select id="fTipo" aria-label="Filtrar por tipo"><option value="">Todos los tipos</option></select>
+        <select id="fEstado" aria-label="Filtrar por estado"><option value="">Planeado y real</option></select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Fecha</th><th>Concepto</th><th>Tipo</th><th class="col-hide">Medio</th><th>Estado</th><th class="r">Importe</th><th></th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============ DEUDAS ============ -->
+  <div class="screen" id="scrDeudas" hidden>
+    <section class="panel" aria-labelledby="dTitle">
+      <div class="panel-head"><h2 id="dTitle">Tarjetas</h2><span class="label">Hoja DEUDAS</span></div>
+      <div class="debts" id="debts"></div>
+    </section>
   </div>
 </div>
 
@@ -455,10 +483,7 @@ function renderAll(){
   const L = S.listas;
   $("status").innerHTML = `Datos de <b>${esc(S.libro)}</b>`;
   const n = PEND.length;
-  $("syncBar").innerHTML = `<span><span class="dot ${diasHasta(S.sincronizado?.slice(0,10))<-1?"warn":""}"></span>PC sincronizó ${hace(S.sincronizado)}</span>`
-    + (n ? `<span><span class="dot warn"></span>${n} pendiente${n===1?"":"s"} de pasar a Excel</span>` : `<span>Todo está en Excel</span>`)
-    + (ERRS.length ? `<span><span class="dot bad"></span>${ERRS.length} con error</span>` : "");
-  $("syncBar").hidden = false;
+  renderSyncBar();
   $("sumNota").innerHTML = n ? `Incluye ${n} pendiente${n===1?"":"s"}` : `Real · <span style="color:var(--plan)">planeado</span>`;
   const cur = $("mesSel").value || (L.meses.includes(mesDe(hoyISO())) ? mesDe(hoyISO()) : L.meses[0]);
   $("mesSel").innerHTML = opts(L.meses, cur);
@@ -477,6 +502,38 @@ function renderAll(){
   $("dlConceptos").innerHTML = lista.map(c=>`<option value="${esc(c)}"></option>`).join("");
   syncTarjeta(); renderMonth(); renderDebts(); renderImpact(); renderErrs();
 }
+/* ---------- Sincronizar con Excel ahora ---------- */
+let espera = null;   // {desde, antes}
+function renderSyncBar(){
+  const n = PEND.length;
+  let html = `<span><span class="dot ${diasHasta(S.sincronizado?.slice(0,10))<-1?"warn":""}"></span>PC sincronizó ${hace(S.sincronizado)}</span>`
+    + (n ? `<span><span class="dot warn"></span>${n} pendiente${n===1?"":"s"} de pasar a Excel</span>` : `<span>Todo está en Excel</span>`)
+    + (ERRS.length ? `<span><span class="dot bad"></span>${ERRS.length} con error</span>` : "");
+  if(espera){
+    const s = Math.round((Date.now()-espera.desde)/1000);
+    html += `<span class="espera">⏳ Esperando a la PC… ${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}</span>`;
+  } else html += `<button class="btn small primary" type="button" id="syncNow">Sincronizar con Excel</button>`;
+  $("syncBar").innerHTML = html; $("syncBar").hidden = false;
+}
+const dormir = ms => new Promise(r=>setTimeout(r,ms));
+$("syncBar").addEventListener("click", async e=>{
+  if(!e.target.closest("#syncNow") || espera) return;
+  const id = nuevoId();
+  try{
+    await gh(`solicitudes/${id}.json`, {method:"PUT", body:{message:"GTO iPhone: sincronizar ahora", content:b64(JSON.stringify({id, creado:new Date().toISOString()}))}});
+  }catch(err){ if(err.message!=="token") toast(err instanceof TypeError ? "Sin conexión a internet" : "No se pudo pedir: "+err.message); return; }
+  espera = {desde:Date.now(), antes:S.sincronizado};
+  const tic = setInterval(renderSyncBar, 1000); renderSyncBar();
+  try{
+    while(Date.now()-espera.desde < 180000){
+      await dormir(6000);
+      let j=null; try{ j = JSON.parse(await gh("estado.json",{raw:true})); }catch{}
+      if(j && j.sincronizado !== espera.antes){ espera=null; clearInterval(tic); await cargar(); toast("Listo: Excel sincronizado"); return; }
+    }
+    showError("La PC no respondió en 3 minutos. Revisa que esté prendida, con tu sesión de Windows abierta y la sincronización programada. La solicitud queda guardada y se atenderá en cuanto la PC se conecte.");
+  } finally { if(espera){ espera=null; } clearInterval(tic); if(S) renderSyncBar(); }
+});
+
 function renderMotivos(){
   const all = S.listas.motivos; let list, sel = $("motivo").value;
   if(tipo==="INGRESO") list = all.filter(m=>m==="INGRESO");
@@ -659,6 +716,18 @@ $("mesSel").addEventListener("change",()=>{ pendingDelete=null; renderMonth(); }
 ["buscar","fTipo","fEstado"].forEach(id=>$(id).addEventListener("input",renderMonth));
 $("refresh").onclick = async ()=>{ $("refresh").disabled=true; if(await cargar()) toast("Datos actualizados"); $("refresh").disabled=false; };
 document.addEventListener("visibilitychange",()=>{ if(!document.hidden && S && CFG) cargar(); });
+
+/* ---------- pantallas: #inicio, #registro, #deudas; sin hash = menú ---------- */
+const PANTALLAS = { inicio:["scrInicio","INICIO"], registro:["scrRegistro","REGISTRO"], deudas:["scrDeudas","DEUDAS"] };
+function mostrarPantalla(){
+  const k = location.hash.slice(1), p = PANTALLAS[k];
+  $("scrHome").hidden = !!p; $("subWrap").hidden = !p;
+  for(const [clave,[id]] of Object.entries(PANTALLAS)) $(id).hidden = clave!==k;
+  if(p){ $("scrTitle").textContent = p[1]; $("mesSel").hidden = k==="deudas"; }
+  window.scrollTo(0,0);
+}
+window.addEventListener("hashchange", mostrarPantalla);
+mostrarPantalla();
 
 $("fecha").value = hoyISO();
 cargar().then(ok=>{ if(ok) resetForm(); });
