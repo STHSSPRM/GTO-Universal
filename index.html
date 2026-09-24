@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="GTO">
+<meta name="theme-color" content="#1F6B57">
+<link rel="apple-touch-icon" href="icono.png">
+<title>GTO Universal</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --ground:#F3F5F2; --surface:#FFFFFF; --sunk:#E9EDE9; --line:#D6DDD8;
+  --ink:#18221E; --muted:#5C6964; --accent:#1F6B57; --accent-ink:#FFFFFF; --accent-soft:#DCEBE5;
+  --ok:#2E7D4F; --warn:#A86A12; --bad:#B03A33; --bad-soft:#F6E1DF; --warn-soft:#F5EAD6; --plan:#4F6FA8; --plan-soft:#E2E9F5;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"IBM Plex Sans","Segoe UI",ui-sans-serif,system-ui,sans-serif;
+  --mono:"IBM Plex Mono",Consolas,ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    color-scheme:dark;
+    --ground:#101513; --surface:#18201C; --sunk:#131A17; --line:#2B3531;
+    --ink:#E4EBE7; --muted:#93A29B; --accent:#52B596; --accent-ink:#0C1411; --accent-soft:#1D3129;
+    --ok:#5DBB83; --warn:#E0A548; --bad:#E57A70; --bad-soft:#3A1F1C; --warn-soft:#3A2E18; --plan:#8EA8DA; --plan-soft:#1E2738;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--body);padding-inline:max(16px,env(safe-area-inset-left));padding-block:calc(20px + env(safe-area-inset-top)) calc(56px + env(safe-area-inset-bottom));-webkit-text-size-adjust:100%}
+/* PIN */
+.pin-screen{position:fixed;inset:0;z-index:7;background:var(--ground);display:grid;place-items:center;padding:24px}
+.pin-card{width:100%;max-width:340px;display:grid;gap:14px;text-align:center}
+.pin-card p{margin:0;color:var(--muted)}
+.pin-card input{height:52px;font-size:26px;letter-spacing:.35em;text-align:center;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-family:var(--mono)}
+.pin-card .btn{height:46px}
+.wrap{max-width:1240px;margin:0 auto;display:grid;gap:18px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+h1,h2{font-family:var(--display);margin:0;text-wrap:balance}
+h1{font-size:28px;font-weight:700;letter-spacing:-.01em}
+h2{font-size:17px;font-weight:600}
+.label{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+button:disabled{cursor:progress;opacity:.6}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:13.5px}
+.brand p b{color:var(--accent);font-weight:600}
+.hright{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+select.mes{height:36px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:0 10px;font-weight:600}
+
+.btn{height:38px;border-radius:8px;border:1px solid var(--line);background:var(--surface);padding:0 14px;font-weight:500}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.btn.small{height:28px;font-size:12.5px;padding:0 9px}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+
+/* summary from INICIO */
+.summary{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px;display:grid;gap:14px}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px 22px}
+.metric{display:grid;gap:3px}
+.metric .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:22px;font-weight:500;line-height:1.2}
+.metric .p{font-size:12.5px;color:var(--muted)}
+.metric .p span{font-family:var(--mono)}
+.metric.debt .v{color:var(--bad)}
+.sub{font-size:12.5px;color:var(--muted)}
+
+.grid{display:grid;grid-template-columns:360px 1fr;gap:18px;align-items:start}
+@media (max-width:920px){.grid{grid-template-columns:minmax(0,1fr)}}
+.col{display:grid;gap:18px;min-width:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:14px;min-width:0}
+.panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+
+/* form */
+form{display:grid;gap:12px}
+.field{display:grid;gap:4px}
+.field>label,.field>.flabel{font-size:13px;font-weight:500;color:var(--muted)}
+.field input,.field select{height:40px;border:1px solid var(--line);border-radius:8px;background:var(--ground);padding:0 10px;width:100%}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{height:32px;border:1px solid var(--line);background:var(--ground);border-radius:99px;padding:0 12px;font-size:13px;font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.seg.estado button[data-v="PLANEADO"][aria-pressed="true"]{background:var(--plan);border-color:var(--plan);color:#fff}
+.hint{font-size:12.5px;color:var(--muted);margin:0}
+.impact{font-size:13px;border-radius:8px;padding:8px 10px;background:var(--sunk);margin:0}
+.impact b{font-family:var(--mono);font-weight:500}
+.msg{font-size:13px;color:var(--bad);margin:0;min-height:1em}
+.factions{display:flex;gap:8px}
+.factions .primary{flex:1}
+
+/* debts */
+.debts{display:grid;gap:10px}
+.debt{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:baseline}
+.debt .n{font-weight:600}
+.debt .s{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+.debt .d{font-size:12.5px;color:var(--muted)}
+.debt .bar{grid-column:1/-1;height:6px;background:var(--sunk);border-radius:99px;overflow:hidden}
+.debt .bar i{display:block;height:100%;background:var(--bad);opacity:.75}
+.pill{display:inline-block;font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.plan{background:var(--plan-soft);color:var(--plan)}
+.debt-total{display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:10px;font-weight:600}
+
+/* motivos */
+.mots{display:grid;gap:9px}
+.mot{display:grid;grid-template-columns:1fr auto;gap:3px 10px;font-size:13.5px}
+.mot .bars{grid-column:1/-1;display:grid;gap:2px}
+.mot .bars i{display:block;height:5px;border-radius:99px}
+.mot .bars i.p{background:var(--plan);opacity:.55}
+.mot .bars i.r{background:var(--accent)}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:10px;height:5px;border-radius:99px;margin-right:5px;vertical-align:middle;background:var(--c)}
+
+/* table */
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.tools input,.tools select{height:34px;border:1px solid var(--line);border-radius:8px;background:var(--ground);padding:0 10px}
+.tools input{flex:1;min-width:150px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;padding:8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+td.r,th.r{text-align:right}
+tr:last-child td{border-bottom:none}
+tr.editing td{background:var(--accent-soft)}
+.c-sub{display:block;font-size:12px;color:var(--muted)}
+.tipo{font-size:12px;font-weight:600;white-space:nowrap}
+.tipo.INGRESO{color:var(--ok)} .tipo.PAGO{color:var(--plan)} .tipo.COMPRA{color:var(--warn)}
+.row-actions{display:flex;gap:2px;justify-content:flex-end;white-space:nowrap}
+.empty{padding:26px 10px;text-align:center;color:var(--muted)}
+.estado-btn{border:none;background:none;padding:0}
+.tfoot td{font-weight:600;border-top:1px solid var(--line)}
+
+/* overlay + toast */
+.busy{position:fixed;inset:0;background:color-mix(in srgb,var(--ground) 55%,transparent);display:grid;place-items:center;z-index:5}
+.busy div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px;font-weight:500;box-shadow:0 8px 30px rgba(0,0,0,.12)}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--ground);padding:9px 16px;border-radius:8px;font-size:13.5px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:6}
+.toast.show{opacity:1}
+.error-box{background:var(--bad-soft);color:var(--bad);border-radius:10px;padding:12px 14px;font-size:14px}
+@media (max-width:560px){
+  .col-hide{display:none} h1{font-size:24px}
+  /* iOS hace zoom en campos con letra menor a 16px */
+  .field input,.field select,.tools input,.tools select,select.mes{font-size:16px}
+  .metric .v{font-size:19px}
+  .sgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .metric.debt{grid-column:1/-1}
+  .wrap,.summary{min-width:0}
+  td,th{padding-inline:5px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<style>
+.setup-card{max-width:380px;text-align:left}
+.pin-card.setup-card .field input{height:46px;font-size:16px;letter-spacing:normal;text-align:left;font-family:var(--body);background:var(--surface)}
+.setup-card ol{margin:0;padding-left:18px;color:var(--muted);font-size:13.5px;display:grid;gap:4px}
+tr.pend td{background:var(--warn-soft)}
+tr.cambio td{opacity:.55}
+.pill.pend{background:var(--warn-soft);color:var(--warn)}
+.errs{display:grid;gap:10px}
+.err{display:grid;gap:4px;font-size:13.5px;border-left:3px solid var(--bad);padding-left:10px}
+.err b{font-weight:600}
+.sync{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:13px;color:var(--muted)}
+.sync .dot{display:inline-block;width:8px;height:8px;border-radius:99px;background:var(--ok);margin-right:6px}
+.sync .dot.warn{background:var(--warn)} .sync .dot.bad{background:var(--bad)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>GTO Universal</h1>
+      <p id="status">Conectando con GitHub…</p>
+    </div>
+    <div class="hright">
+      <label class="label" for="mesSel">Mes</label>
+      <select class="mes" id="mesSel"></select>
+      <button class="btn" type="button" id="refresh">Actualizar</button>
+      <button class="btn ghost" type="button" id="openSetup" aria-label="Configuración">⚙︎</button>
+    </div>
+  </header>
+
+  <div class="sync" id="syncBar" hidden></div>
+  <div class="error-box" id="errBox" hidden></div>
+
+  <section class="summary" aria-label="Resumen de INICIO">
+    <div class="panel-head"><span class="label">Resumen de INICIO · <span id="sumMes"></span></span><span class="sub" id="sumNota">Real · <span style="color:var(--plan)">planeado</span></span></div>
+    <div class="sgrid">
+      <div class="metric"><span class="label">Ingreso</span><span class="v" id="mIng">—</span><span class="p">planeado <span id="mIngP">—</span></span></div>
+      <div class="metric"><span class="label">Gasto</span><span class="v" id="mGas">—</span><span class="p">planeado <span id="mGasP">—</span></span></div>
+      <div class="metric"><span class="label">Pago tarjeta</span><span class="v" id="mPag">—</span><span class="p">planeado <span id="mPagP">—</span></span></div>
+      <div class="metric"><span class="label">Disponible</span><span class="v" id="mDis">—</span><span class="p">planeado <span id="mDisP">—</span></span></div>
+      <div class="metric debt"><span class="label">Deuda tarjetas</span><span class="v" id="mDeuda">—</span><span class="p">próximo pago <span id="mProx">—</span></span></div>
+    </div>
+  </section>
+
+  <div class="grid">
+    <div class="col">
+      <section class="panel" aria-labelledby="fTitle">
+        <div class="panel-head"><h2 id="fTitle">Nuevo movimiento</h2><span class="label">→ REGISTRO</span></div>
+        <form id="form" autocomplete="off">
+          <div class="field"><span class="flabel">Tipo</span><div class="seg" id="segTipo" role="group" aria-label="Tipo"></div></div>
+          <div class="field"><span class="flabel">Estado</span><div class="seg estado" id="segEstado" role="group" aria-label="Estado"></div></div>
+          <div class="field">
+            <label for="concepto">Concepto</label>
+            <input id="concepto" list="dlConceptos" maxlength="120" required placeholder="Escribe o elige uno que ya usaste">
+            <datalist id="dlConceptos"></datalist>
+            <p class="hint" id="conceptoHint" hidden></p>
+          </div>
+          <div class="two">
+            <div class="field"><label for="importe">Importe</label><input id="importe" class="num" type="number" inputmode="decimal" step="0.01" min="0.01" required placeholder="0.00"></div>
+            <div class="field"><label for="fecha">Fecha</label><input id="fecha" type="date" required></div>
+          </div>
+          <div class="two">
+            <div class="field"><label for="motivo">Motivo</label><select id="motivo"></select></div>
+            <div class="field"><label for="mes">Mes</label><select id="mes"></select></div>
+          </div>
+          <div class="two">
+            <div class="field"><label for="medio">Medio</label><select id="medio"></select></div>
+            <div class="field" id="tarjetaField"><label for="tarjeta">Tarjeta</label><select id="tarjeta"></select></div>
+          </div>
+          <div class="field"><label for="notas">Notas <span style="font-weight:400">(opcional)</span></label><input id="notas" maxlength="200"></div>
+          <p class="impact" id="impact" hidden></p>
+          <p class="msg" id="formMsg" role="alert"></p>
+          <div class="factions">
+            <button class="btn primary" type="submit" id="saveBtn">Guardar</button>
+            <button class="btn" type="button" id="cancelEdit" hidden>Cancelar</button>
+          </div>
+          <p class="hint">Se guarda en la nube al instante y pasa a tu Excel cuando la PC sincroniza.</p>
+        </form>
+      </section>
+
+      <section class="panel" aria-labelledby="eTitle" id="errPanel" hidden>
+        <div class="panel-head"><h2 id="eTitle">No se pudieron aplicar</h2><span class="label">Revisa y vuelve a capturar</span></div>
+        <div class="errs" id="errs"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="dTitle">
+        <div class="panel-head"><h2 id="dTitle">Deudas</h2><span class="label">Hoja DEUDAS</span></div>
+        <div class="debts" id="debts"></div>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="panel" aria-labelledby="rTitle">
+        <div class="panel-head">
+          <h2 id="rTitle">Registro de <span id="regMes"></span></h2>
+          <span class="sub" id="regCount"></span>
+        </div>
+        <div class="tools">
+          <input id="buscar" type="search" placeholder="Buscar concepto, motivo o notas…" aria-label="Buscar">
+          <select id="fTipo" aria-label="Filtrar por tipo"><option value="">Todos los tipos</option></select>
+          <select id="fEstado" aria-label="Filtrar por estado"><option value="">Planeado y real</option></select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Fecha</th><th>Concepto</th><th>Tipo</th><th class="col-hide">Medio</th><th>Estado</th><th class="r">Importe</th><th></th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="moTitle">
+        <div class="panel-head"><h2 id="moTitle">Gasto por motivo</h2>
+          <div class="legend"><span style="--c:var(--plan)">Planeado</span><span style="--c:var(--accent)">Real</span></div></div>
+        <div class="mots" id="mots"></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div class="pin-screen" id="setup" hidden>
+  <form class="pin-card setup-card" id="setupForm" autocomplete="off">
+    <h1>Conectar con GitHub</h1>
+    <p>Los mismos datos que usaste en <b>CONFIGURAR GITHUB.bat</b> de tu PC. Se guardan solo en este teléfono.</p>
+    <div class="field"><label for="sOwner">Usuario de GitHub</label><input id="sOwner" autocapitalize="none" autocorrect="off" spellcheck="false" required></div>
+    <div class="field"><label for="sRepo">Repositorio de datos (privado)</label><input id="sRepo" autocapitalize="none" autocorrect="off" spellcheck="false" value="gto-datos" required></div>
+    <div class="field"><label for="sToken">Token</label><input id="sToken" type="password" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="github_pat_…" required></div>
+    <p class="msg" id="setupMsg" role="alert"></p>
+    <button class="btn primary" type="submit">Conectar</button>
+    <button class="btn ghost" type="button" id="setupCancel" hidden>Cancelar</button>
+    <button class="btn ghost" type="button" id="setupForget" hidden>Olvidar en este teléfono</button>
+  </form>
+</div>
+<div class="busy" id="busy" hidden><div id="busyText">Guardando…</div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const fmt = new Intl.NumberFormat("es-MX",{style:"currency",currency:"MXN"});
+const money = n => n==null ? "—" : fmt.format(n);
+const MESES = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
+const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+let S = null;            // estado.json subido por la PC
+let PEND = [];           // [{name, path, sha, p:{id,creado,op,datos}}]
+let ERRS = [];           // [{name, path, sha, e:{pendiente,error,fecha}}]
+let tipo = "GASTO", estado = "REAL";
+let editing = null, pendingDelete = null, mesManual = false;
+
+/* ---------- configuración (solo en este teléfono) ---------- */
+const CFG_KEY = "gto.github";
+// Solo para pruebas locales; no se puede cambiar desde un enlace
+const API = (()=>{ try{ return localStorage.getItem("gto.api") || "https://api.github.com"; }catch{ return "https://api.github.com"; } })();
+function cfgGet(){ try{ return JSON.parse(localStorage.getItem(CFG_KEY)||"null"); }catch{ return null; } }
+function cfgSet(c){ try{ c ? localStorage.setItem(CFG_KEY, JSON.stringify(c)) : localStorage.removeItem(CFG_KEY); }catch{} }
+let CFG = cfgGet();
+function abrirSetup(msg){
+  $("busy").hidden = true;
+  $("sOwner").value = CFG?.owner||""; $("sRepo").value = CFG?.repo||"gto-datos"; $("sToken").value = "";
+  $("setupMsg").textContent = msg||""; $("setupCancel").hidden = !CFG; $("setupForget").hidden = !CFG;
+  $("setup").hidden = false;
+}
+$("openSetup").onclick = ()=>abrirSetup();
+$("setupCancel").onclick = ()=>{ $("setup").hidden = true; };
+$("setupForget").onclick = ()=>{ cfgSet(null); CFG=null; S=null; abrirSetup("Se borró la conexión de este teléfono."); };
+$("setupForm").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const c = {owner:$("sOwner").value.trim(), repo:$("sRepo").value.trim(), token:$("sToken").value.trim()};
+  if(!c.token && CFG) c.token = CFG.token;
+  $("setupMsg").textContent = "Probando…";
+  try{
+    const r = await fetch(`${API}/repos/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}`, {headers:ghHeaders(c), cache:"no-store"});
+    if(r.status===401) throw new Error("GitHub rechazó el token. Revisa que lo copiaste completo y que no haya vencido.");
+    if(r.status===404) throw new Error("No encuentro ese repositorio con ese token. Revisa el usuario, el nombre del repositorio y que el token tenga acceso a él.");
+    if(!r.ok) throw new Error("GitHub respondió "+r.status+".");
+    const j = await r.json();
+    if(!j.private) throw new Error("Ese repositorio es PÚBLICO: tus movimientos serían visibles para cualquiera. Hazlo privado en GitHub y vuelve a intentar.");
+    CFG = c; cfgSet(c); $("setup").hidden = true; $("setupMsg").textContent = "";
+    await cargar();
+  }catch(err){ $("setupMsg").textContent = err.message; }
+});
+
+/* ---------- GitHub ---------- */
+function ghHeaders(c=CFG, raw=false){
+  return {Authorization:"Bearer "+c.token, Accept: raw?"application/vnd.github.raw+json":"application/vnd.github+json", "X-GitHub-Api-Version":"2022-11-28"};
+}
+const base = () => `${API}/repos/${encodeURIComponent(CFG.owner)}/${encodeURIComponent(CFG.repo)}/contents/`;
+async function gh(path, {method="GET", body=null, raw=false}={}){
+  const r = await fetch(base()+path, {method, headers:{...ghHeaders(CFG,raw), ...(body?{"Content-Type":"application/json"}:{})}, body: body?JSON.stringify(body):undefined, cache:"no-store"});
+  if(r.status===404 && method==="GET") return null;
+  if(r.status===401){ abrirSetup("GitHub rechazó el token (puede haber vencido). Escribe uno nuevo."); throw new Error("token"); }
+  if(!r.ok){ let m=""; try{ m=(await r.json()).message||""; }catch{} throw new Error(`GitHub ${r.status}${m?": "+m:""}`); }
+  if(r.status===204) return {};
+  return raw ? r.text() : r.json();
+}
+const b64 = s => { const bytes = new TextEncoder().encode(s); let bin=""; for(const b of bytes) bin+=String.fromCharCode(b); return btoa(bin); };
+async function listarJson(carpeta){
+  const l = await gh(carpeta); if(!Array.isArray(l)) return [];
+  const files = l.filter(f=>f.type==="file" && f.name.endsWith(".json")).sort((a,b)=>a.name.localeCompare(b.name));
+  return Promise.all(files.map(async f=>({name:f.name, path:f.path, sha:f.sha, data: JSON.parse(await gh(f.path,{raw:true}))})));
+}
+
+/* ---------- carga ---------- */
+async function cargar(){
+  if(!CFG){ abrirSetup(); return false; }
+  if(!S){ $("busyText").textContent="Leyendo datos…"; $("busy").hidden=false; }
+  try{
+    const [txt, pend, errs] = await Promise.all([ gh("estado.json",{raw:true}), listarJson("pendientes"), listarJson("errores") ]);
+    if(!txt){ showError("Todavía no hay datos en GitHub. En tu PC corre «SINCRONIZAR AHORA.bat» una vez."); return false; }
+    S = JSON.parse(txt);
+    PEND = pend.map(x=>({...x, p:x.data})); ERRS = errs.map(x=>({...x, e:x.data}));
+    $("errBox").hidden = true;
+    renderAll(); return true;
+  }catch(e){
+    if(e.message!=="token") showError(e instanceof TypeError ? "Sin conexión a internet. Vuelve a intentar." : e.message);
+    return false;
+  }finally{ $("busy").hidden=true; }
+}
+function showError(t){ $("errBox").textContent=t; $("errBox").hidden=false; }
+function toast(t){ const el=$("toast"); el.textContent=t; el.classList.add("show"); clearTimeout(toast.t); toast.t=setTimeout(()=>el.classList.remove("show"),2800); }
+
+/* ---------- pendientes ---------- */
+function nuevoId(){ const d=new Date(), p=n=>String(n).padStart(2,"0"); return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}-${Math.random().toString(36).slice(2,7)}`; }
+async function encolar(op, datos){
+  const id = nuevoId(), p = {id, creado:new Date().toISOString(), op, datos};
+  $("busyText").textContent="Guardando…"; $("busy").hidden=false;
+  try{
+    const r = await gh(`pendientes/${id}.json`, {method:"PUT", body:{message:`GTO iPhone: ${op}`, content:b64(JSON.stringify(p,null,1))}});
+    PEND.push({name:id+".json", path:`pendientes/${id}.json`, sha:r.content.sha, p});
+    renderAll(); return true;
+  }catch(e){ if(e.message!=="token"){ $("formMsg").textContent = e instanceof TypeError ? "Sin conexión: no se guardó. Intenta de nuevo." : e.message; toast("No se guardó"); } return false; }
+  finally{ $("busy").hidden=true; }
+}
+async function quitarArchivo(lista, x, msg){
+  $("busyText").textContent="Quitando…"; $("busy").hidden=false;
+  try{ await gh(x.path,{method:"DELETE", body:{message:msg, sha:x.sha}}); lista.splice(lista.indexOf(x),1); renderAll(); return true; }
+  catch(e){ if(e.message!=="token"){ toast("Ya no estaba: quizá la PC ya lo aplicó"); await cargar(); } return false; }
+  finally{ $("busy").hidden=true; }
+}
+
+/* ---------- registro proyectado = snapshot + pendientes ---------- */
+const firmaOk = (r,f) => f && r.concepto===f.concepto && Math.abs((r.importe||0)-(+f.importe||0))<0.005;
+function proyectar(){
+  let reg = S.registro.map(r=>({...r, _src:"xl"}));
+  for(const x of PEND){
+    const {op, datos:d} = x.p;
+    if(op==="agregar") reg.push({...d, importe:+d.importe, concepto:d.concepto.toUpperCase(), tarjeta: tarjetasNom().includes(d.medio)?d.medio:(d.tarjeta||""), fila:null, _src:"pend", _pend:x});
+    else {
+      const i = reg.findIndex(r=>r.fila===+d.fila && r._src==="xl" && firmaOk(r,d.firma));
+      if(i<0) continue;
+      if(op==="real") reg[i] = {...reg[i], estado:"REAL", _cambio:x};
+      else if(op==="eliminar") reg[i] = {...reg[i], _borrado:x};
+      else if(op==="editar"){ const n=d.datos; reg[i] = {...reg[i], ...n, importe:+n.importe, concepto:n.concepto.toUpperCase(), tarjeta: tarjetasNom().includes(n.medio)?n.medio:(n.tarjeta||""), _cambio:x}; }
+    }
+  }
+  return reg;
+}
+// Mismas reglas que las fórmulas de INICIO y DEUDAS; se suman como diferencia sobre lo que calculó Excel
+function sumaMes(reg, mes){
+  const o={ingP:0,ingR:0,gasP:0,gasR:0,pagP:0,pagR:0};
+  for(const r of reg){ if(r._borrado || r.mes!==mes) continue; const R=r.estado==="REAL", v=r.importe||0;
+    if(r.tipo==="INGRESO") R?o.ingR+=v:o.ingP+=v; else if(r.tipo==="GASTO") R?o.gasR+=v:o.gasP+=v; else if(r.tipo==="PAGO TARJETA") R?o.pagR+=v:o.pagP+=v; }
+  return o;
+}
+function saldoMov(reg, t){
+  let s=0;
+  for(const r of reg){ if(r._borrado || r.estado!=="REAL") continue; const v=r.importe||0;
+    if((r.tipo==="GASTO"||r.tipo==="COMPRA TARJETA") && (r.medio===t || (r.medio==="TARJETA" && r.tarjeta===t))) s+=v;
+    if(r.tipo==="PAGO TARJETA" && r.tarjeta===t) s-=v; }
+  return s;
+}
+function vista(){
+  const reg = proyectar();
+  if(!PEND.length) return {reg, meses:S.inicio.meses, deudas:S.deudas, deudaTotal:S.inicio.deudaTotal};
+  const base = S.registro;
+  let acum = 0;
+  const meses = S.inicio.meses.map(m=>{
+    const a=sumaMes(base,m.mes), b=sumaMes(reg,m.mes), d=k=>b[k]-a[k];
+    acum += d("ingR")-d("gasR")-d("pagR");
+    return {...m, ingP:m.ingP+d("ingP"), ingR:m.ingR+d("ingR"), gasP:m.gasP+d("gasP"), gasR:m.gasR+d("gasR"), pagP:m.pagP+d("pagP"), pagR:m.pagR+d("pagR"),
+      dispP:m.dispP+d("ingP")-d("gasP")-d("pagP"), dispR:m.dispR+acum};
+  });
+  let dt = 0;
+  const deudas = S.deudas.map(x=>{ const dd = saldoMov(reg,x.tarjeta)-saldoMov(base,x.tarjeta); dt+=dd; return {...x, saldo:x.saldo+dd}; });
+  return {reg, meses, deudas, deudaTotal:S.inicio.deudaTotal+dt};
+}
+
+/* ---------- helpers ---------- */
+const hoyISO = () => { const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+const mesDe = iso => { if(!iso||!/^\d{4}-\d\d/.test(iso)) return ""; const [y,m]=iso.split("-"); return MESES[+m-1]+"-"+y.slice(2); };
+const fCorta = iso => { if(!/^\d{4}-\d\d-\d\d$/.test(iso||"")) return esc(iso||"—"); const [y,m,d]=iso.split("-"); return d+"-"+MESES[+m-1].toLowerCase(); };
+const diasHasta = iso => { if(!/^\d{4}-\d\d-\d\d$/.test(iso||"")) return null; const [y,m,d]=iso.split("-").map(Number); const t=new Date(); t.setHours(0,0,0,0); return Math.round((new Date(y,m-1,d)-t)/864e5); };
+const hace = iso => { const min=Math.round((Date.now()-new Date(iso))/6e4); if(isNaN(min)) return "—"; if(min<1) return "hace un momento"; if(min<60) return `hace ${min} min`; const h=Math.round(min/60); if(h<48) return `hace ${h} h`; return `hace ${Math.round(h/24)} días`; };
+const tarjetasNom = () => S.listas.tarjetas.map(t=>t.tarjeta);
+const opts = (arr, sel) => arr.map(v=>`<option${v===sel?" selected":""}>${esc(v)}</option>`).join("");
+
+/* ---------- render ---------- */
+function renderAll(){
+  const L = S.listas;
+  $("status").innerHTML = `Datos de <b>${esc(S.libro)}</b>`;
+  const n = PEND.length;
+  $("syncBar").innerHTML = `<span><span class="dot ${diasHasta(S.sincronizado?.slice(0,10))<-1?"warn":""}"></span>PC sincronizó ${hace(S.sincronizado)}</span>`
+    + (n ? `<span><span class="dot warn"></span>${n} pendiente${n===1?"":"s"} de pasar a Excel</span>` : `<span>Todo está en Excel</span>`)
+    + (ERRS.length ? `<span><span class="dot bad"></span>${ERRS.length} con error</span>` : "");
+  $("syncBar").hidden = false;
+  $("sumNota").innerHTML = n ? `Incluye ${n} pendiente${n===1?"":"s"}` : `Real · <span style="color:var(--plan)">planeado</span>`;
+  const cur = $("mesSel").value || (L.meses.includes(mesDe(hoyISO())) ? mesDe(hoyISO()) : L.meses[0]);
+  $("mesSel").innerHTML = opts(L.meses, cur);
+  if(!L.tipos.includes(tipo)) tipo = L.tipos[0];
+  if(!L.estados.includes(estado)) estado = L.estados[L.estados.length-1];
+  $("segTipo").innerHTML = L.tipos.map(t=>`<button type="button" data-v="${esc(t)}" aria-pressed="${t===tipo}">${esc(t)}</button>`).join("");
+  $("segEstado").innerHTML = L.estados.map(t=>`<button type="button" data-v="${esc(t)}" aria-pressed="${t===estado}">${esc(t)}</button>`).join("");
+  $("medio").innerHTML = opts(L.medios, $("medio").value || "TRANSFERENCIA");
+  $("tarjeta").innerHTML = `<option value="">—</option>` + opts(tarjetasNom(), $("tarjeta").value);
+  $("mes").innerHTML = opts(L.meses, $("mes").value || mesDe($("fecha").value));
+  $("fTipo").innerHTML = `<option value="">Todos los tipos</option>` + opts(L.tipos, $("fTipo").value);
+  $("fEstado").innerHTML = `<option value="">Planeado y real</option>` + opts(L.estados, $("fEstado").value);
+  renderMotivos();
+  const vistos = new Set(), lista=[];
+  [...proyectar()].reverse().forEach(r=>{ if(r.concepto && !vistos.has(r.concepto)){ vistos.add(r.concepto); lista.push(r.concepto); } });
+  $("dlConceptos").innerHTML = lista.map(c=>`<option value="${esc(c)}"></option>`).join("");
+  syncTarjeta(); renderMonth(); renderDebts(); renderImpact(); renderErrs();
+}
+function renderMotivos(){
+  const all = S.listas.motivos; let list, sel = $("motivo").value;
+  if(tipo==="INGRESO") list = all.filter(m=>m==="INGRESO");
+  else if(tipo==="PAGO TARJETA") list = all.filter(m=>m==="PAGO TARJETA");
+  else list = all.filter(m=>m!=="INGRESO" && m!=="PAGO TARJETA");
+  if(!list.length) list = all;
+  $("motivo").innerHTML = opts(list, list.includes(sel)?sel:list[0]);
+}
+function syncTarjeta(){
+  const medio = $("medio").value, isCard = tarjetasNom().includes(medio);
+  if(isCard) $("tarjeta").value = medio;
+  const need = tipo==="PAGO TARJETA" || (medio==="TARJETA" && (tipo==="GASTO"||tipo==="COMPRA TARJETA")) || isCard;
+  $("tarjetaField").style.visibility = need ? "visible" : "hidden";
+  $("tarjeta").disabled = isCard;
+  if(!need) $("tarjeta").value = "";
+}
+function renderImpact(){
+  const el=$("impact"), t=$("tarjeta").value, imp=parseFloat($("importe").value);
+  const d = S && vista().deudas.find(x=>x.tarjeta===t);
+  if(!d || !(imp>0)){ el.hidden=true; return; }
+  const esPago = tipo==="PAGO TARJETA", esCompra = tipo==="GASTO"||tipo==="COMPRA TARJETA";
+  if(!esPago && !esCompra){ el.hidden=true; return; }
+  el.innerHTML = `${esPago?"Este pago deja":"Esta compra sube"} la deuda de <b style="font-family:var(--body);font-weight:600">${esc(t)}</b> de <b>${money(d.saldo)}</b> a <b>${money(d.saldo+(esPago?-imp:imp))}</b>.`
+    + (estado!=="REAL" ? ` <span style="color:var(--muted)">DEUDAS lo cuenta cuando lo marques REAL.</span>` : "");
+  el.hidden=false;
+}
+function renderMonth(){
+  const V = vista(), mes = $("mesSel").value;
+  $("sumMes").textContent = mes; $("regMes").textContent = mes;
+  const m = V.meses.find(x=>x.mes===mes) || {};
+  const set=(id,v,neg)=>{ $(id).textContent=money(v??0); if(neg) $(id).style.color=(v??0)<0?"var(--bad)":""; };
+  set("mIng",m.ingR); set("mIngP",m.ingP); set("mGas",m.gasR); set("mGasP",m.gasP);
+  set("mPag",m.pagR); set("mPagP",m.pagP); set("mDis",m.dispR,true); set("mDisP",m.dispP,true);
+  $("mDeuda").textContent = money(V.deudaTotal);
+  $("mProx").textContent = S.inicio.proximoPago ? fCorta(S.inicio.proximoPago) : "—";
+
+  const q=$("buscar").value.trim().toLowerCase(), ft=$("fTipo").value, fe=$("fEstado").value;
+  const delMes = V.reg.filter(r=>r.mes===mes);
+  const rows = delMes.filter(r=>(!ft||r.tipo===ft)&&(!fe||r.estado===fe)&&(!q||(r.concepto+" "+r.motivo+" "+(r.notas||"")).toLowerCase().includes(q)))
+    .sort((a,b)=>(a.fecha||"").localeCompare(b.fecha||"")||((a.fila??1e9)-(b.fila??1e9)));
+  $("regCount").textContent = `${delMes.filter(r=>!r._borrado).length} movimiento${delMes.length===1?"":"s"}`;
+  $("rows").innerHTML = rows.length ? rows.map(r=>{
+    const tcls = (r.tipo||"").split(" ")[0];
+    const medio = r.tarjeta && r.tarjeta!==r.medio ? `${esc(r.medio)} · ${esc(r.tarjeta)}` : esc(r.medio);
+    let est, acts, cls="";
+    if(r._src==="pend"){
+      cls="pend"; est=`<span class="pill pend">⏳ ${esc(r.estado)}</span>`;
+      acts=`<button class="btn small ghost" data-cancel="${esc(r._pend.name)}">Quitar</button>`;
+    } else if(r._borrado || r._cambio){
+      cls = r._borrado ? "cambio" : "";
+      est = `<span class="pill pend">⏳ ${r._borrado?"se eliminará":esc(r.estado)}</span>`;
+      acts = `<button class="btn small ghost" data-cancel="${esc((r._borrado||r._cambio).name)}">Deshacer</button>`;
+    } else {
+      est = r.estado==="PLANEADO"
+        ? `<button class="estado-btn" data-real="${r.fila}" title="Marcar como REAL"><span class="pill plan">PLANEADO ✓</span></button>`
+        : `<span class="pill">${esc(r.estado)}</span>`;
+      acts = pendingDelete===r.fila
+        ? `<button class="btn small danger" data-delok="${r.fila}">Eliminar</button><button class="btn small ghost" data-delno>No</button>`
+        : `<button class="btn small ghost" data-edit="${r.fila}">Editar</button><button class="btn small ghost" data-del="${r.fila}" aria-label="Eliminar">✕</button>`;
+    }
+    return `<tr class="${cls} ${editing&&editing.fila===r.fila&&r._src==="xl"?"editing":""}">
+      <td class="num">${fCorta(r.fecha)}</td>
+      <td>${esc(r.concepto)}<span class="c-sub">${esc(r.motivo)}${r.notas?" · "+esc(r.notas):""}</span></td>
+      <td><span class="tipo ${tcls}">${esc(r.tipo)}</span></td>
+      <td class="col-hide" style="color:var(--muted)">${medio}</td>
+      <td>${est}</td>
+      <td class="r num">${money(r.importe)}</td>
+      <td><div class="row-actions">${acts}</div></td></tr>`;
+  }).join("") : `<tr><td colspan="7" class="empty">${delMes.length?"Ningún movimiento coincide con el filtro.":"No hay movimientos en "+esc(mes)+"."}</td></tr>`;
+
+  const agg={};
+  delMes.filter(r=>!r._borrado && (r.tipo==="GASTO"||r.tipo==="COMPRA TARJETA")).forEach(r=>{
+    const a = agg[r.motivo] ||= {p:0,r:0}; if(r.estado==="REAL") a.r+=r.importe||0; else a.p+=r.importe||0; });
+  const ks = Object.keys(agg).sort((a,b)=>(agg[b].p+agg[b].r)-(agg[a].p+agg[a].r));
+  const max = Math.max(1,...ks.map(k=>Math.max(agg[k].p,agg[k].r)));
+  $("mots").innerHTML = ks.length ? ks.map(k=>`<div class="mot"><span>${esc(k)}</span><span class="num">${money(agg[k].r)} <span style="color:var(--plan)">/ ${money(agg[k].p)}</span></span>
+    <div class="bars"><i class="p" style="width:${agg[k].p/max*100}%"></i><i class="r" style="width:${agg[k].r/max*100}%"></i></div></div>`).join("")
+    : `<p class="sub" style="margin:0">Sin gastos registrados en este mes.</p>`;
+}
+function renderDebts(){
+  const V = vista(), ds = V.deudas, max = Math.max(1,...ds.map(d=>d.saldo||0));
+  $("debts").innerHTML = ds.map(d=>{
+    const dias = diasHasta(d.proximo);
+    const chip = dias==null ? `<span class="pill warn">${esc(d.proximo||"Falta dato")}</span>`
+      : `<span class="pill ${dias<=3?"bad":dias<=7?"warn":""}">${dias<0?"vencido":dias===0?"hoy":dias===1?"mañana":"en "+dias+" días"}</span>`;
+    return `<div class="debt"><span class="n">${esc(d.tarjeta)}</span><span class="s">${money(d.saldo)}</span>
+      <span class="d">Paga ${dias==null?"":fCorta(d.proximo)} ${chip}</span><span class="d" style="text-align:right">corte día ${d.corte??"—"}</span>
+      <div class="bar"><i style="width:${Math.max(0,d.saldo||0)/max*100}%"></i></div></div>`;
+  }).join("") + `<div class="debt-total"><span>Total</span><span class="num">${money(V.deudaTotal)}</span></div>`;
+}
+function renderErrs(){
+  $("errPanel").hidden = !ERRS.length;
+  $("errs").innerHTML = ERRS.map(x=>{
+    const p = x.e.pendiente||{}, d = p.datos||{}, c = d.concepto || d.datos?.concepto || d.firma?.concepto || "";
+    return `<div class="err"><b>${esc(p.op)} · ${esc(c)} ${d.importe?money(+d.importe):""}</b><span>${esc(x.e.error)}</span>
+      <div><button class="btn small ghost" data-errdel="${esc(x.name)}">Entendido, quitar</button></div></div>`;
+  }).join("");
+}
+
+/* ---------- validación (mismas reglas que la PC) ---------- */
+function validar(d){
+  const L=S.listas, T=tarjetasNom();
+  if(!L.meses.includes(d.mes)) return "Elige un mes de la lista.";
+  if(!d.concepto) return "Escribe un concepto.";
+  if(!(parseFloat(d.importe)>0)) return "Escribe un importe mayor que cero.";
+  if(!/^\d{4}-\d\d-\d\d$/.test(d.fecha)) return "Elige una fecha.";
+  if(!L.motivos.includes(d.motivo)) return "Elige un motivo.";
+  const t = T.includes(d.medio) ? d.medio : d.tarjeta;
+  if(d.tipo==="PAGO TARJETA" && !t) return "Elige la tarjeta a la que abonas.";
+  if(d.medio==="TARJETA" && (d.tipo==="GASTO"||d.tipo==="COMPRA TARJETA") && !t) return "Elige con qué tarjeta se hizo la compra.";
+  return "";
+}
+
+/* ---------- form ---------- */
+function resetForm(){
+  editing=null; mesManual=false; $("form").reset();
+  $("fecha").value = hoyISO(); $("mes").value = mesDe(hoyISO());
+  $("fTitle").textContent="Nuevo movimiento"; $("saveBtn").textContent="Guardar"; $("cancelEdit").hidden=true;
+  $("formMsg").textContent=""; $("conceptoHint").hidden=true;
+  if(S){ $("medio").value = S.listas.medios.includes("TRANSFERENCIA")?"TRANSFERENCIA":S.listas.medios[0]; renderMotivos(); syncTarjeta(); renderImpact(); renderMonth(); }
+}
+function setTipo(t){ tipo=t; [...$("segTipo").children].forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===t)); renderMotivos(); syncTarjeta(); renderImpact(); }
+function setEstado(t){ estado=t; [...$("segEstado").children].forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===t)); renderImpact(); }
+$("segTipo").addEventListener("click",e=>{ const b=e.target.closest("button"); if(b) setTipo(b.dataset.v); });
+$("segEstado").addEventListener("click",e=>{ const b=e.target.closest("button"); if(b) setEstado(b.dataset.v); });
+$("medio").addEventListener("change",()=>{ syncTarjeta(); renderImpact(); });
+$("tarjeta").addEventListener("change",renderImpact);
+$("importe").addEventListener("input",renderImpact);
+$("fecha").addEventListener("change",()=>{ const m=mesDe($("fecha").value); if(!mesManual && S && S.listas.meses.includes(m)) $("mes").value=m; });
+$("mes").addEventListener("change",()=>{ mesManual = $("mes").value!==mesDe($("fecha").value); });
+$("concepto").addEventListener("change",()=>{
+  if(!S) return;
+  const c=$("concepto").value.trim().toUpperCase(); $("concepto").value=c;
+  const prev=[...proyectar()].reverse().find(r=>r.concepto===c);
+  if(!prev){ $("conceptoHint").hidden=true; return; }
+  if(S.listas.tipos.includes(prev.tipo)) setTipo(prev.tipo);
+  if(S.listas.motivos.includes(prev.motivo)) { renderMotivos(); $("motivo").value=prev.motivo; }
+  if(S.listas.medios.includes(prev.medio)) $("medio").value=prev.medio;
+  syncTarjeta(); if(prev.tarjeta) $("tarjeta").value=prev.tarjeta;
+  if(!$("importe").value && prev.importe) $("importe").value=prev.importe;
+  $("conceptoHint").textContent=`Usé lo que registraste la última vez (${fCorta(prev.fecha)}): ${prev.motivo}, ${prev.medio}, ${money(prev.importe)}.`;
+  $("conceptoHint").hidden=false; renderImpact();
+});
+function datosForm(){
+  return { mes:$("mes").value, fecha:$("fecha").value, tipo, estado, medio:$("medio").value,
+    concepto:$("concepto").value.trim().toUpperCase(), motivo:$("motivo").value,
+    importe:String(parseFloat($("importe").value)), notas:$("notas").value.trim(), tarjeta:$("tarjeta").value };
+}
+$("form").addEventListener("submit", async e=>{
+  e.preventDefault(); $("formMsg").textContent="";
+  const d = datosForm(), err = validar(d);
+  if(err){ $("formMsg").textContent = err; return; }
+  const ok = editing ? await encolar("editar",{fila:editing.fila, firma:editing.firma, datos:d}) : await encolar("agregar",d);
+  if(ok){ toast(editing?"Cambio guardado · pasará a Excel al sincronizar":"Guardado · pasará a Excel al sincronizar"); $("mesSel").value=d.mes; resetForm(); }
+});
+$("cancelEdit").onclick=resetForm;
+
+/* ---------- tabla ---------- */
+$("rows").addEventListener("click", async e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  const find = f => S.registro.find(r=>r.fila===+f);
+  const firma = r => ({concepto:r.concepto, importe:r.importe});
+  if(b.dataset.cancel){ const x=PEND.find(p=>p.name===b.dataset.cancel); if(x && await quitarArchivo(PEND,x,"GTO iPhone: cancelado")) toast("Pendiente quitado"); }
+  else if(b.dataset.real){ const r=find(b.dataset.real); if(r && await encolar("real",{fila:r.fila,firma:firma(r)})) toast("Se marcará REAL al sincronizar"); }
+  else if(b.dataset.edit){
+    const r=find(b.dataset.edit); if(!r) return;
+    editing={fila:r.fila, firma:firma(r)}; mesManual=r.mes!==mesDe(r.fecha);
+    setTipo(r.tipo); setEstado(r.estado);
+    $("concepto").value=r.concepto; $("importe").value=r.importe; $("fecha").value=r.fecha; $("mes").value=r.mes;
+    renderMotivos(); $("motivo").value=r.motivo; $("medio").value=r.medio; syncTarjeta(); $("tarjeta").value=r.tarjeta; $("notas").value=r.notas;
+    $("fTitle").textContent="Editar renglón "+r.fila; $("saveBtn").textContent="Guardar cambios"; $("cancelEdit").hidden=false;
+    $("conceptoHint").hidden=true; renderImpact(); renderMonth(); $("concepto").scrollIntoView({behavior:"smooth",block:"center"}); $("concepto").focus();
+  }
+  else if(b.dataset.del){ pendingDelete=+b.dataset.del; renderMonth(); }
+  else if("delno" in b.dataset){ pendingDelete=null; renderMonth(); }
+  else if(b.dataset.delok){ const r=find(b.dataset.delok); pendingDelete=null; if(r && await encolar("eliminar",{fila:r.fila,firma:firma(r)})) toast("Se eliminará de Excel al sincronizar"); }
+});
+$("errs").addEventListener("click", async e=>{ const b=e.target.closest("[data-errdel]"); if(!b) return; const x=ERRS.find(p=>p.name===b.dataset.errdel); if(x) await quitarArchivo(ERRS,x,"GTO iPhone: error revisado"); });
+$("mesSel").addEventListener("change",()=>{ pendingDelete=null; renderMonth(); });
+["buscar","fTipo","fEstado"].forEach(id=>$(id).addEventListener("input",renderMonth));
+$("refresh").onclick = async ()=>{ $("refresh").disabled=true; if(await cargar()) toast("Datos actualizados"); $("refresh").disabled=false; };
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden && S && CFG) cargar(); });
+
+$("fecha").value = hoyISO();
+cargar().then(ok=>{ if(ok) resetForm(); });
+</script>
+</body>
+</html>
